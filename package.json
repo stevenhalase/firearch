@@ -1,0 +1,11 @@
+{
+  "name": "firearch",
+  "version": "0.0.101",
+  "description": "Schema modeling for Firestore",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Steven Halase",
+  "license": "ISC"
+}
