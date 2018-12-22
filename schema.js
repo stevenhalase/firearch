@@ -131,8 +131,10 @@ module.exports = class Schema {
 
         if (object[path] && object[path].length > 0) {
           await asyncForEach(object[path], async (r) => {
-            const res = await model.findById(r);
-            results.push(res);
+            if (typeof r !== 'undefined') {
+              const res = await model.findById(r);
+              results.push(res);
+            }
           });
         }
 

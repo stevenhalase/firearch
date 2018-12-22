@@ -19,7 +19,10 @@ module.exports = class Model {
         return doc.data();
       })
       .then(doc => this._modelSchema._build(doc))
-      .then(doc => this._modelSchema._hooks('findById', doc))
+      .then(doc => {
+        this._modelSchema._hooks('findById');
+        return doc;
+      })
       .then(doc => this._modelSchema._doPopulates(doc))
       .then(doc => this._modelSchema._doVirtuals(doc))
       .then(doc => {
@@ -55,11 +58,8 @@ module.exports = class Model {
         return resultsBuild;
       })
       .then(results => {
-        const resultsHooks = [];
-        results.forEach(doc => {
-          resultsHooks.push(this._modelSchema._hooks('find', doc));
-        });
-        return resultsHooks;
+        this._modelSchema._hooks('find');
+        return results;
       })
       .then(async results => {
         const resultsPopulates = [];
