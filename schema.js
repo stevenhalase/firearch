@@ -4,12 +4,8 @@ module.exports = class Schema {
   }
 
   build(object) {
-    console.log(object);
-    console.log(this._fieldDefs);
     let retObject = {};
     for (const key in this._fieldDefs) {
-      console.log(key);
-      console.log(object.hasOwnProperty(key));
       if (object.hasOwnProperty(key)) {
         retObject[key] = object[key];
       }
