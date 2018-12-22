@@ -10,6 +10,7 @@ module.exports = class Schema {
     this._models = null;
     this._object = null;
     this._populates = [];
+    this._virtuals = [];
   }
 
   _setFirebase(firebase) {
@@ -75,6 +76,8 @@ module.exports = class Schema {
       }
     }
 
+    retObject._id = object._id;
+
     return retObject;
   }
 
@@ -88,6 +91,16 @@ module.exports = class Schema {
     return object;
   }
 
+  async _doVirtuals(object) {
+    for (const virtual of this._virtuals) {
+      const fieldName = virtual.fieldName;
+      const virtualDef = virtual.virtualDef;
+      const model = this._models.find(m => m._modelName === virtualDef.ref);
+      object[fieldName] = await model.find(virtualDef.foreignField, '==', object[virtualDef.localField]);
+    }
+    return object;
+  }
+
   populate(def) {
     this._populates.push(def);
     return;
@@ -95,5 +108,9 @@ module.exports = class Schema {
 
   pre(operation, cb) {
     this._preOps.push({ operation, cb });
+  }
+
+  virtual(fieldName, virtualDef) {
+    this._virtuals.push({ fieldName, virtualDef });
   }
 };
