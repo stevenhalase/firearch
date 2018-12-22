@@ -90,13 +90,13 @@ module.exports = class Schema {
     return retVal;
   }
 
-  _hooks(operation, object) {
+  _hooks(operation) {
     for (const preOp of this._preOps) {
       if (preOp.operation === operation) {
         preOp.cb.call(this, this._next);
       }
     }
-    return object;
+    return;
   }
 
   _next() {
