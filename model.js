@@ -13,6 +13,7 @@ module.exports = class Model {
   }
 
   findById(id) {
+    this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       this._firebase.firestore().collection(this._modelName).doc(id).get()
       .then(doc => {
@@ -35,6 +36,7 @@ module.exports = class Model {
   }
 
   find(field, operator, value) {
+    this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       let query = this._firebase.firestore().collection(this._modelName);
 
