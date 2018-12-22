@@ -164,7 +164,6 @@ module.exports = class Schema {
   }
 
   pre(operation, cb) {
-    console.log('Adding pre: ', operation);
     this._preOps.push({ operation, cb });
   }
 
