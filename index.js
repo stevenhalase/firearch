@@ -1,22 +1,35 @@
+const firebase = require('firebase/app');
+require('firebase/auth');
+require('firebase/database');
+require('firebase/firestore');
+
 const Schema = require('./schema');
-const Model = require('./Model');
+const Model = require('./model');
 
 class FireArch {
   constructor() {
     this._models = [];
+    this._firebase = firebase;
     this.Model = Model;
     this.Schema = Schema;
   }
 
-  connect() {
-    const _fireArch = this instanceof FireArch ? this : fireArch;
+  connect(firebaseConfig, firestoreSettings) {
+    this._firebaseConfig = firebaseConfig;
+    this._firestoreSettings = firestoreSettings;
+    this._createConnection();
   }
 
   model(modelName, modelSchema) {
-    const newModel = new Model(modelName, modelSchema);
+    const newModel = new Model(modelName, modelSchema, this._firebase);
     this._models.push(newModel);
     return newModel;
   }
+
+  _createConnection() {
+    this._firebase.initializeApp(this._firebaseConfig);
+    this._firebase.firestore().settings(this._firestoreSettings);
+  }
 }
 
-const fireArch = module.exports = new FireArch();
+const _fireArch = module.exports = new FireArch();

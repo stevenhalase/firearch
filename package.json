@@ -11,5 +11,8 @@
     "url": "https://github.com/stevenhalase/firearch.git"
   },
   "author": "Steven Halase",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^5.7.1"
+  }
 }
