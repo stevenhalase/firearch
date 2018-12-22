@@ -1,5 +1,7 @@
 const crypto = require('crypto');
 
+const { asyncForEach } = require('./utils');
+
 module.exports = class Model {
   constructor(modelName, modelSchema, firebase, models) {
     this._modelName = modelName;
@@ -34,7 +36,7 @@ module.exports = class Model {
       let query = this._firebase.firestore().collection(this._modelName);
 
       if (field && operator && value) {
-        query.where(field, operator, value)
+        query = query.where(field, operator, value)
       }
       
       query.get()
@@ -51,6 +53,29 @@ module.exports = class Model {
           resultsBuild.push(this._modelSchema._build(doc));
         });
         return resultsBuild;
+      })
+      .then(results => {
+        const resultsHooks = [];
+        results.forEach(doc => {
+          resultsHooks.push(this._modelSchema._hooks('find', doc));
+        });
+        return resultsHooks;
+      })
+      .then(async results => {
+        const resultsPopulates = [];
+        await asyncForEach(results, async (doc) => {
+          const res = await this._modelSchema._doPopulates(doc);
+          resultsPopulates.push(res);
+        });
+        return resultsPopulates;
+      })
+      .then(async results => {
+        const resultsVirtuals = [];
+        await asyncForEach(results, async (doc) => {
+          const res = await this._modelSchema._doVirtuals(doc);
+          resultsVirtuals.push(res);
+        });
+        return resultsVirtuals;
       })
       .then(results => {
         resolve(results);
