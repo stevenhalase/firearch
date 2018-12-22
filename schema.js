@@ -1,6 +1,8 @@
 const StringType = require('./types/string');
 const RefType = require('./types/ref');
 
+const { asyncForEach } = require('./utils');
+
 module.exports = class Schema {
   constructor(fieldDefs) {
     this._fieldDefs = fieldDefs;
@@ -34,18 +36,34 @@ module.exports = class Schema {
     if (typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref')) {
       valid = RefType.validate(value);
     }
+    if (this._fieldDefs[key] instanceof Array) {
+      if (this._fieldDefs[key][0] === String) {
+        valid = StringType.validateArray(value);
+      }
+      if (typeof this._fieldDefs[key][0] === 'object' && Object.keys(this._fieldDefs[key][0]).includes('ref')) {
+        valid = RefType.validateArray(value);
+      }
+    }
 
     return valid;
   }
 
   _getValue(key, value) {
-    let retVal = false;
+    let retVal = null;
 
     if (this._fieldDefs[key] === String) {
       retVal = StringType.getValue(value);
     }
     if (typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref')) {
       retVal = RefType.getValue(value);
+    }
+    if (this._fieldDefs[key] instanceof Array) {
+      if (this._fieldDefs[key][0] === String) {
+        retVal = StringType.getValueArray(value);
+      }
+      if (typeof this._fieldDefs[key][0] === 'object' && Object.keys(this._fieldDefs[key][0]).includes('ref')) {
+        retVal = RefType.getValueArray(value);
+      }
     }
 
     return retVal;
@@ -86,7 +104,21 @@ module.exports = class Schema {
       const path = populate.path;
       const modelName = populate.model;
       const model = this._models.find(m => m._modelName === modelName);
-      object[path] = await model.findById(object[path]);
+
+      if (this._model._modelSchema._fieldDefs[path] instanceof Array) {
+        const results = [];
+
+        await asyncForEach(object[path], async (r) => {
+          const res = await model.findById(r);
+          results.push(res);
+        });
+
+        object[path] = results;
+      } else {
+        if (typeof object[path] !== 'undefined') {
+          object[path] = await model.findById(object[path]);
+        }
+      }
     }
     return object;
   }
