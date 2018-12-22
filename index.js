@@ -21,7 +21,7 @@ class FireArch {
   }
 
   model(modelName, modelSchema) {
-    const newModel = new Model(modelName, modelSchema, this._firebase);
+    const newModel = new Model(modelName, modelSchema, this._firebase, this._models);
     this._models.push(newModel);
     return newModel;
   }
