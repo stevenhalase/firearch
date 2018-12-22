@@ -31,7 +31,13 @@ module.exports = class Model {
 
   find(field, operator, value) {
     return new Promise((resolve, reject) => {
-      this._firebase.firestore().collection(this._modelName).where(field, operator, value).get()
+      let query = this._firebase.firestore().collection(this._modelName);
+
+      if (field && operator && value) {
+        query.where(field, operator, value)
+      }
+      
+      query.get()
       .then(querySnapshot => {
         const results = [];
         querySnapshot.forEach(doc => {
