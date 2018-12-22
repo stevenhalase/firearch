@@ -106,7 +106,7 @@ module.exports = class Schema {
   _build(object) {
     let retObject = {};
     for (const key in this._fieldDefs) {
-      if (object.hasOwnProperty(key)) {
+      if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
         if (this._validateField(key, object[key])) {
           retObject[key] = this._getValue(key, object[key]);
         } else {
