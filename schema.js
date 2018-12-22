@@ -1,4 +1,7 @@
 const StringType = require('./types/string');
+const BooleanType = require('./types/boolean');
+const DateType = require('./types/date');
+const NumberType = require('./types/number');
 const RefType = require('./types/ref');
 
 const { asyncForEach } = require('./utils');
@@ -33,6 +36,15 @@ module.exports = class Schema {
     if (this._fieldDefs[key] === String) {
       valid = StringType.validate(value);
     }
+    if (this._fieldDefs[key] === Boolean) {
+      valid = BooleanType.validate(value);
+    }
+    if (this._fieldDefs[key] === Date) {
+      valid = DateType.validate(value);
+    }
+    if (this._fieldDefs[key] === Number) {
+      valid = NumberType.validate(value);
+    }
     if (typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref')) {
       valid = RefType.validate(value);
     }
@@ -53,6 +65,15 @@ module.exports = class Schema {
 
     if (this._fieldDefs[key] === String) {
       retVal = StringType.getValue(value);
+    }
+    if (this._fieldDefs[key] === Boolean) {
+      retVal = BooleanType.getValue(value);
+    }
+    if (this._fieldDefs[key] === Date) {
+      retVal = DateType.getValue(value);
+    }
+    if (this._fieldDefs[key] === Number) {
+      retVal = NumberType.getValue(value);
     }
     if (typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref')) {
       retVal = RefType.getValue(value);
@@ -108,10 +129,12 @@ module.exports = class Schema {
       if (this._model._modelSchema._fieldDefs[path] instanceof Array) {
         const results = [];
 
-        await asyncForEach(object[path], async (r) => {
-          const res = await model.findById(r);
-          results.push(res);
-        });
+        if (object[path] && object[path].length > 0) {
+          await asyncForEach(object[path], async (r) => {
+            const res = await model.findById(r);
+            results.push(res);
+          });
+        }
 
         object[path] = results;
       } else {
