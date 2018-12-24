@@ -32,7 +32,7 @@ module.exports = class Model {
       .catch(error => {
         reject(error);
       });
-    })
+    });
   }
 
   find(field, operator, value) {
@@ -48,7 +48,7 @@ module.exports = class Model {
       .then(querySnapshot => {
         const results = [];
         querySnapshot.forEach(doc => {
-            results.push(doc.data());
+          results.push(doc.data());
         });
         return results;
       })
@@ -85,7 +85,7 @@ module.exports = class Model {
       .catch(error => {
         reject(error);
       });
-    })
+    });
   }
 
   save(object) {
@@ -109,8 +109,98 @@ module.exports = class Model {
     });
   }
 
-  remove() {
+  removeById(id) {
+    return new Promise((resolve, reject) => {
+      if (typeof id === 'undefined') {
+        reject('Missing id required parameter.');
+        return;
+      }
 
+      try {
+        this._firebase.firestore().collection(this._modelName).doc(id).delete()
+          .then(() => {
+            resolve(`Document ${id} successfully removed.`);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  remove(field, operator, value) {
+    return new Promise((resolve, reject) => {
+      if (typeof field === 'undefined' || typeof operator === 'undefined' || typeof value === 'undefined') {
+        reject('Missing field, operator or value required parameters.');
+        return;
+      }
+      
+      this._firebase.firestore().collection(this._modelName).where(field, operator, value).get()
+      .then(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          doc.ref.delete();
+        });
+        resolve(`Removed ${querySnapshot.size} documents.`);
+      })
+      .catch(error => {
+        reject(error);
+      });
+    });
+  }
+
+  updateById(id, updateObj) {
+    return new Promise((resolve, reject) => {
+      if (typeof id === 'undefined' || typeof updateObj === 'undefined') {
+        reject('Missing id or updateObj required parameter.');
+        return;
+      }
+      if (typeof updateObj !== 'object' || Object.keys(updateObj).length === 0) {
+        reject('Expected updateObj to be a non-empty object.');
+        return;
+      }
+
+      try {
+        
+        const build = this._modelSchema._build(updateObj, true);
+        this._firebase.firestore().collection(this._modelName).doc(id).set(build, { merge: true })
+          .then(() => {
+            resolve(`Document ${id} successfully updated.`);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  update(field, operator, value, updateObj) {
+    return new Promise((resolve, reject) => {
+      if (typeof field === 'undefined' || typeof operator === 'undefined' || typeof value === 'undefined' || typeof updateObj === 'undefined') {
+        reject('Missing field, operator, value or updateObj required parameters.');
+        return;
+      }
+      if (typeof updateObj !== 'object' || Object.keys(updateObj).length === 0) {
+        reject('Expected updateObj to be a non-empty object.');
+        return;
+      }
+
+      const build = this._modelSchema._build(updateObj, true);
+      
+      this._firebase.firestore().collection(this._modelName).where(field, operator, value).get()
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            doc.ref.set(build, { merge: true });
+          });
+          resolve(`Updated ${querySnapshot.size} documents.`);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
   }
 
   
