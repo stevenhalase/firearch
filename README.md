@@ -1,10 +1,12 @@
 # FireArch
 A [Firebase](https://firebase.google.com/) object modeling library. Built with influences of the [Mongoose](https://mongoosejs.com/) modeling and access paradigms.
 
+**THIS PACKAGE IS NOT PRODUCTION READY**
+
 ## Installation
 FireArch will be released in the future and available on NPM. For the time being the repo can be included in a project via:
 
-    npm install https://github.com/stevenhalase/firearch.git
+    npm install firearch
 
 ## Importing
 FireArch can be imported via standard Node.js require:
