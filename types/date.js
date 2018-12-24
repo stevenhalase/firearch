@@ -4,7 +4,9 @@ module.exports = class DateType {
     value = typeof value.seconds !== 'undefined' && typeof value.nanoseconds !== 'undefined'
       ? (value.seconds * 1000) + (value.nanoseconds / 1000000)
       : value;
-    return (new Date(value)).getTime() > 0;
+    
+    const date = new Date(value);
+    return (date instanceof Date && !isNaN(date.valueOf()));
   }
   
   static validateArray(value) {
@@ -12,7 +14,9 @@ module.exports = class DateType {
       i = typeof i.seconds !== 'undefined' && typeof i.nanoseconds !== 'undefined'
         ? (i.seconds * 1000) + (i.nanoseconds / 1000000)
         : i;
-      (new Date(i)).getTime() > 0
+      
+      const date = new Date(i);
+      return (date instanceof Date && !isNaN(date.valueOf()));
     });
   }
 

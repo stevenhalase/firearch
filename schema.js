@@ -35,25 +35,45 @@ module.exports = class Schema {
 
     if (this._fieldDefs[key] === String) {
       valid = StringType.validate(value);
+      if (!valid) {
+        throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected String. Value: ${value}.`);
+      }
     }
     if (this._fieldDefs[key] === Boolean) {
       valid = BooleanType.validate(value);
+      if (!valid) {
+        throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Boolean. Value: ${value}.`);
+      }
     }
     if (this._fieldDefs[key] === Date) {
       valid = DateType.validate(value);
+      if (!valid) {
+        throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Date. Value: ${value}.`);
+      }
     }
     if (this._fieldDefs[key] === Number) {
-      valid = NumberType.validate(value);
+      if (!valid) {
+        throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Number. Value: ${value}.`);
+      }
     }
     if (typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref')) {
       valid = RefType.validate(value);
+      if (!valid) {
+        throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Document ID. Value: ${value}.`);
+      }
     }
     if (this._fieldDefs[key] instanceof Array) {
       if (this._fieldDefs[key][0] === String) {
         valid = StringType.validateArray(value);
+        if (!valid) {
+          throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Array<String>. Value: ${value}.`);
+        }
       }
       if (typeof this._fieldDefs[key][0] === 'object' && Object.keys(this._fieldDefs[key][0]).includes('ref')) {
         valid = RefType.validateArray(value);
+        if (!valid) {
+          throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Array<Document ID>. Value: ${value}.`);
+        }
       }
     }
 
@@ -106,11 +126,14 @@ module.exports = class Schema {
   _build(object) {
     let retObject = {};
     for (const key in this._fieldDefs) {
+      // TODO: Build in required properties.
       if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
-        if (this._validateField(key, object[key])) {
+        try {
+          this._validateField(key, object[key]);
           retObject[key] = this._getValue(key, object[key]);
-        } else {
-          console.warn(`Expected type ${this._fieldDefs[key]} for field ${key}`);
+        } catch (error) {
+          console.warn(`Error processing ${this._model._modelName}. Operation Failed. Inner Exception: ${error.message}`);
+          throw new Error(`Error processing ${this._model._modelName}. Operation Failed. Inner Exception: ${error.message}`);
         }
       }
     }
