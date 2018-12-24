@@ -90,18 +90,22 @@ module.exports = class Model {
 
   save(object) {
     return new Promise((resolve, reject) => {
-      const build = this._modelSchema._build(object);
+      try {
+        const build = this._modelSchema._build(object);
 
-      const docRef = this._firebase.firestore().collection(this._modelName).doc();
-      const docId = docRef.id;
-      build._id = docId;
-      docRef.set(build)
-        .then(doc => {
-          resolve(docId);
-        })
-        .catch(error => {
-          reject(error);
-        });
+        const docRef = this._firebase.firestore().collection(this._modelName).doc();
+        const docId = docRef.id;
+        build._id = docId;
+        docRef.set(build)
+          .then(doc => {
+            resolve(docId);
+          })
+          .catch(error => {
+            reject(error);
+          });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
