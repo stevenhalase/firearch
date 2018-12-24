@@ -43,7 +43,7 @@ Model definitions are also much the same as [Mongoose](https://mongoosejs.com/):
 	    categories:  [{ ref:  'Category'  }]
     });
     
-    PackSchema.virtual('subArticles',  {
+    PostSchema.virtual('subArticles',  {
 	    ref:  'Article',
 	    localField:  '_id',
 	    foreignField:  'post'
@@ -149,7 +149,7 @@ Currently Virtual Fields will always result in an array.
 **Example**
 The following example will add a property to the object named `subArticles` which will be an array of documents which are from the `Article` model and have a property `post` that equals the `_id` of the current document.
 
-    PackSchema.virtual('subArticles',  {
+    PostSchema.virtual('subArticles',  {
 	    ref:  'Article',
 	    localField:  '_id',
 	    foreignField:  'post'
@@ -201,6 +201,11 @@ FireArch supports autopopulation of model properties. The method expects a 'path
 	    title: 'A sweet postime story'
     }
   
+   **.findById(id)**
+ The findById method retrieves a Document by id.  Returns a Promise.
+    
+    Post.findById('IRjTSGf2VqTZbn1HVen9');
+    
  **.find(field, operator, value)**
  The find method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are optional and FireArch will fall back to returning all documents for a model.  Returns a Promise.
 
@@ -209,6 +214,28 @@ FireArch supports autopopulation of model properties. The method expects a 'path
     
     // Return all Posts
     Post.find();
+  
+   **.removeById(id)**
+ The removeById method deletes a Document by id.  Returns a Promise.
+    
+    Post.removeById('IRjTSGf2VqTZbn1HVen9');
+    
+ **.remove(field, operator, value)**
+ The remove method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are all **required**.  Returns a Promise.
+
+    // Perform Firestore query
+    Post.remove('title',  '==',  'A sweet postime story');
+  
+   **.updateById(id, updateObject)**
+ The updateById method updates a Document by id. Uses `{ merge: true }` to only update the properties given in the updateObject.  Returns a Promise.
+    
+    Post.updateById('IRjTSGf2VqTZbn1HVen9', { title: 'Some other title' });
+    
+ **.update(field, operator, value, updateObj)**
+ The update method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are all **required**. Uses `{ merge: true }` to only update the properties given in the updateObject. Updates all matching Documents. Returns a Promise.
+
+    // Perform Firestore query
+    Post.update('title',  '==',  'A sweet postime story', { title: 'Some other title });
 
 ## Why
 Given that there aren't any other good, simple Mongoose-like libraries out there for Firebase someone had to start one. This is it.

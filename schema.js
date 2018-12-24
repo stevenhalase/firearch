@@ -123,7 +123,7 @@ module.exports = class Schema {
     return;
   }
 
-  _build(object) {
+  _build(object, removeId) {
     let retObject = {};
     for (const key in this._fieldDefs) {
       // TODO: Build in required properties.
@@ -139,6 +139,9 @@ module.exports = class Schema {
     }
 
     retObject._id = object._id;
+    if (removeId) {
+      delete retObject._id;
+    }
 
     return retObject;
   }
