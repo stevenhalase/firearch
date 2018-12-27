@@ -4,7 +4,7 @@ module.exports = class RefType {
   }
 
   static validateArray(value) {
-    return value.every(i => typeof i === 'string' && value.length === 20);
+    return value.every(i => typeof i === 'string' && i.length === 20);
   }
 
   static getValue(value) {
