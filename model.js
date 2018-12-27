@@ -12,7 +12,7 @@ module.exports = class Model {
     this._firebase = firebase;
   }
 
-  findById(id) {
+  findById(id, skipPopulate) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       this._firebase.firestore().collection(this._modelName).doc(id).get()
@@ -24,7 +24,13 @@ module.exports = class Model {
         this._modelSchema._hooks('findById');
         return doc;
       })
-      .then(doc => this._modelSchema._doPopulates(doc))
+      .then(doc => {
+        if (!skipPopulate) {
+          this._modelSchema._doPopulates(doc)
+        } else {
+          return doc;
+        }
+      })
       .then(doc => this._modelSchema._doVirtuals(doc))
       .then(doc => {
         resolve(doc);

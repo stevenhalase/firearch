@@ -158,7 +158,7 @@ module.exports = class Schema {
         if (object[path] && object[path].length > 0) {
           await asyncForEach(object[path], async (r) => {
             if (typeof r !== 'undefined') {
-              const res = await model.findById(r);
+              const res = await model.findById(r, true);
               results.push(res);
             }
           });
@@ -167,7 +167,7 @@ module.exports = class Schema {
         object[path] = results;
       } else {
         if (typeof object[path] !== 'undefined') {
-          object[path] = await model.findById(object[path]);
+          object[path] = await model.findById(object[path], true);
         }
       }
     }
