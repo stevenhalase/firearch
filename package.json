@@ -1,6 +1,6 @@
 {
   "name": "firearch",
-  "version": "0.0.1004",
+  "version": "0.0.1005",
   "description": "Schema modeling for Firestore",
   "main": "index.js",
   "scripts": {
