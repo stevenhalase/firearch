@@ -16,6 +16,7 @@ module.exports = class Schema {
     this._object = null;
     this._populates = [];
     this._virtuals = [];
+    this._uploads = [];
   }
 
   _setFirestoreInstance(firestoreInstance) {
@@ -195,5 +196,9 @@ module.exports = class Schema {
 
   virtual(fieldName, virtualDef) {
     this._virtuals.push({ fieldName, virtualDef });
+  }
+
+  upload(storagePath, path) {
+    this._uploads.push({ storagePath, path }); 
   }
 };
