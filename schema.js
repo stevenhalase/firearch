@@ -10,7 +10,7 @@ module.exports = class Schema {
   constructor(fieldDefs) {
     this._fieldDefs = fieldDefs;
     this._preOps = [];
-    this._firebase = null;
+    this._firestoreInstance = null;
     this._model = null;
     this._models = null;
     this._object = null;
@@ -18,8 +18,8 @@ module.exports = class Schema {
     this._virtuals = [];
   }
 
-  _setFirebase(firebase) {
-    this._firebase = firebase;
+  _setFirestoreInstance(firestoreInstance) {
+    this._firestoreInstance = firestoreInstance;
   }
 
   _setModel(model) {

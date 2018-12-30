@@ -3,19 +3,19 @@ const crypto = require('crypto');
 const { asyncForEach } = require('./utils');
 
 module.exports = class Model {
-  constructor(modelName, modelSchema, firebase, models) {
+  constructor(modelName, modelSchema, firestoreInstance, models) {
     this._modelName = modelName;
     this._modelSchema = modelSchema;
-    this._modelSchema._setFirebase(firebase);
+    this._modelSchema._setFirestoreInstance(firestoreInstance);
     this._modelSchema._setModel(this);
     this._modelSchema._setModels(models);
-    this._firebase = firebase;
+    this._firestoreInstance = firestoreInstance;
   }
 
   findById(id, skipPopulate) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
-      this._firebase.firestore().collection(this._modelName).doc(id).get()
+      this._firestoreInstance.collection(this._modelName).doc(id).get()
       .then(doc => {
         return doc.data();
       })
@@ -26,7 +26,7 @@ module.exports = class Model {
       })
       .then(doc => {
         if (!skipPopulate) {
-          this._modelSchema._doPopulates(doc)
+          return this._modelSchema._doPopulates(doc)
         } else {
           return doc;
         }
@@ -44,7 +44,7 @@ module.exports = class Model {
   find(field, operator, value) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
-      let query = this._firebase.firestore().collection(this._modelName);
+      let query = this._firestoreInstance.collection(this._modelName);
 
       if (field && operator && value) {
         query = query.where(field, operator, value)
@@ -99,7 +99,7 @@ module.exports = class Model {
       try {
         const build = this._modelSchema._build(object);
 
-        const docRef = this._firebase.firestore().collection(this._modelName).doc();
+        const docRef = this._firestoreInstance.collection(this._modelName).doc();
         const docId = docRef.id;
         build._id = docId;
         docRef.set(build)
@@ -123,7 +123,7 @@ module.exports = class Model {
       }
 
       try {
-        this._firebase.firestore().collection(this._modelName).doc(id).delete()
+        this._firestoreInstance.collection(this._modelName).doc(id).delete()
           .then(() => {
             resolve(`Document ${id} successfully removed.`);
           })
@@ -143,7 +143,7 @@ module.exports = class Model {
         return;
       }
       
-      this._firebase.firestore().collection(this._modelName).where(field, operator, value).get()
+      this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
       .then(querySnapshot => {
         querySnapshot.forEach(doc => {
           doc.ref.delete();
@@ -170,7 +170,7 @@ module.exports = class Model {
       try {
         
         const build = this._modelSchema._build(updateObj, true);
-        this._firebase.firestore().collection(this._modelName).doc(id).set(build, { merge: true })
+        this._firestoreInstance.collection(this._modelName).doc(id).set(build, { merge: true })
           .then(() => {
             resolve(`Document ${id} successfully updated.`);
           })
@@ -196,7 +196,7 @@ module.exports = class Model {
 
       const build = this._modelSchema._build(updateObj, true);
       
-      this._firebase.firestore().collection(this._modelName).where(field, operator, value).get()
+      this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
         .then(querySnapshot => {
           querySnapshot.forEach(doc => {
             doc.ref.set(build, { merge: true });
