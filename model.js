@@ -1,15 +1,69 @@
-const crypto = require('crypto');
-
 const { asyncForEach } = require('./utils');
 
 module.exports = class Model {
-  constructor(modelName, modelSchema, firestoreInstance, models) {
+  constructor(modelName, modelSchema, firestoreInstance, storageInstance, storageBucketName, models) {
     this._modelName = modelName;
     this._modelSchema = modelSchema;
     this._modelSchema._setFirestoreInstance(firestoreInstance);
     this._modelSchema._setModel(this);
     this._modelSchema._setModels(models);
     this._firestoreInstance = firestoreInstance;
+    this._storageInstance = storageInstance;
+    this._storageBucketName = storageBucketName;
+    this._createUploadMethods(); 
+  }
+
+  _createUploadMethods() { 
+    if (!!this._modelSchema._uploads.length) { 
+      for (const upload of this._modelSchema._uploads) { 
+        this[`${upload.path}Upload`] = (fileName, file, id) => {
+          return new Promise((resolve, reject) => { 
+            this._upload(upload.storagePath, file, true, fileName, id, upload.path) 
+              .then(response => { 
+                resolve(response); 
+              }) 
+              .catch(error => { 
+                reject(error); 
+              }); 
+          }); 
+        } 
+      } 
+    } 
+  }
+
+  _fileUpload(fullStoragePath, file) { 
+    return new Promise(async (resolve, reject) => { 
+      const gcFile = this._storageInstance.bucket(this._storageBucketName).file(fullStoragePath);
+      file.pipe(gcFile.createWriteStream({ predefinedAcl: 'publicread' }))
+        .on('error', err => {
+          reject(error);
+        })
+        .on('finish', () => {
+          resolve(`https://${this._storageBucketName}.storage.googleapis.com/${fullStoragePath}`)
+        });
+    });
+  }
+
+  _upload(storagePath, file, updateObj, fileName, id, field) { 
+    return new Promise((resolve, reject) => { 
+      let fullStoragePath = updateObj ? storagePath.replace('{id}', id).replace('{fileName}', fileName) : storagePath;
+      this._fileUpload(fullStoragePath, file) 
+        .then(downloadUrl => { 
+          if (updateObj) {
+            const updateObj = {}; 
+            updateObj[field] = downloadUrl; 
+            this.updateById(id, updateObj) 
+              .then(response => { 
+                resolve(`${fileName} uploaded. Document ${id}'s ${field} successfully updated.`); 
+              }); 
+          } else {
+            resolve(downloadUrl);
+          }
+        }) 
+        .catch(error => {
+          reject(error); 
+        }) 
+    }); 
   }
 
   findById(id, skipPopulate) {
@@ -144,15 +198,15 @@ module.exports = class Model {
       }
       
       this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          doc.ref.delete();
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            doc.ref.delete();
+          });
+          resolve(`Removed ${querySnapshot.size} documents.`);
+        })
+        .catch(error => {
+          reject(error);
         });
-        resolve(`Removed ${querySnapshot.size} documents.`);
-      })
-      .catch(error => {
-        reject(error);
-      });
     });
   }
 
@@ -209,5 +263,16 @@ module.exports = class Model {
     });
   }
 
-  
+  upload(storagePath, file) { 
+    return new Promise((resolve, reject) => { 
+      this._upload(storagePath, file, false)
+        .then(downloadUrl => {
+          resolve(downloadUrl);
+        }) 
+        .catch(error => { 
+          reject(error); 
+        }) 
+    }); 
+  }
+
 };

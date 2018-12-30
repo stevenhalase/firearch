@@ -18,7 +18,7 @@ FireArch can be imported via standard Node.js require:
 ## Connecting to Firestore
 FireArch creates a connection to Firestore in much the same way [Mongoose](https://mongoosejs.com/) connects to MongoDB:
 
-    firearch.connect(firestoreSettings);
+    firearch.connect(firestoreSettings, storageBucketName?); // storageBucketName is only required if the upload or model-generated upload methods are used
 
 ## Authorizing to Firestore
 It is recommended to use keyfile authorization and environment variable setup using the `dotenv` NPM package. Simply include the package in your project, download the keyfile from Google Cloud Console and set the following environment variable in a `.env` file at the root of your project.
@@ -79,6 +79,7 @@ Limited data type support is available for schema definitions at this time. It i
     });
 
 **Date**
+
 Dates will be automatically validated and removed if not valid. Supports Firebase [Timestamp](https://firebase.google.com/docs/reference/js/firebase.firestore.Timestamp) parsing automatically.
 
     const  PostSchema  =  new  Schema({
@@ -86,6 +87,7 @@ Dates will be automatically validated and removed if not valid. Supports Firebas
     });
 
 *Usage*
+
 ***Only timestamps are currently supported.***
 
     const  PostSchema  =  new  Schema({
@@ -107,6 +109,7 @@ Dates will be automatically validated and removed if not valid. Supports Firebas
 
 
 **Document Reference**
+
 Document references can be defined in the following way. Ref should be the string name given for another model included in the consuming package. 
 
     const  PostSchema  =  new  Schema({
@@ -122,6 +125,7 @@ This should be a string formatted ID used to reference another document.
 
 
 **Document Reference Array**
+
 Document reference arrays can be defined in the following way. Ref should be the string name given for another model included in the consuming package. 
 
     const  PostSchema  =  new  Schema({
@@ -146,6 +150,7 @@ Firearch supports virtual field definitions following again in the paradigms use
 Currently Virtual Fields will always result in an array.
 
 **Example**
+
 The following example will add a property to the object named `subArticles` which will be an array of documents which are from the `Article` model and have a property `post` that equals the `_id` of the current document.
 
     PostSchema.virtual('subArticles',  {
@@ -183,9 +188,41 @@ FireArch supports autopopulation of model properties. The method expects a 'path
 	    next();
     };
 
+## Storage
+FireArch supports Google Cloud Storage uploads. Uploading files is supported in two ways:
+
+**Using the upload method in schema definition**
+
+Registers an upload definition for a given schema. `fullStoragePath` can contain `{id}` and `{fileName}` placeholders which will be populated when the generated method is called.
+
+    PostSchema.upload(fullStoragePath, field);
+
+    // usage
+    PostSchema.upload('model/{id}/images/{fileName}', 'imageUrl');
+
+Firearch will automatically make available an upload method based on the given inputs. It can then be used as such:
+
+    Post.imageUrlUpload(filename, file, documentId); // file should be a File Stream object
+
+    //usage
+    Post.imageUrlUpload('image-name.jpg', file, 'SY4a5mm8wXBU03DvvH8U');
+
+These generated methods will simultaneously upload the given file to Google Cloud Storage as well as update the given Document's field with the uploaded file's url.
+
+**Using model `upload()` method**
+
+Upload file to a given path in Google Cloud Storage and return the uploaded file's url.
+
+    Post.upload(fullStoragePath, file); // file should be a File Stream object
+
+    // usage
+    Post.upload('images/file-name.jpg', file);
+
+
 ## Using A Model
 
- **.save(object)**
+**.save(object)**
+
  The save method will validate the given object against the Schema and save the document to Firebase. Returns a Promise.
 
     const post = {
@@ -200,12 +237,14 @@ FireArch supports autopopulation of model properties. The method expects a 'path
 	    title: 'A sweet postime story'
     }
   
-   **.findById(id)**
+**.findById(id)**
+
  The findById method retrieves a Document by id.  Returns a Promise.
     
     Post.findById('IRjTSGf2VqTZbn1HVen9');
     
- **.find(field, operator, value)**
+**.find(field, operator, value)**
+
  The find method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are optional and FireArch will fall back to returning all documents for a model.  Returns a Promise.
 
     // Perform Firestore query
@@ -214,23 +253,27 @@ FireArch supports autopopulation of model properties. The method expects a 'path
     // Return all Posts
     Post.find();
   
-   **.removeById(id)**
+**.removeById(id)**
+
  The removeById method deletes a Document by id.  Returns a Promise.
     
     Post.removeById('IRjTSGf2VqTZbn1HVen9');
     
- **.remove(field, operator, value)**
+**.remove(field, operator, value)**
+
  The remove method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are all **required**.  Returns a Promise.
 
     // Perform Firestore query
     Post.remove('title',  '==',  'A sweet postime story');
   
-   **.updateById(id, updateObject)**
+**.updateById(id, updateObject)**
+
  The updateById method updates a Document by id. Uses `{ merge: true }` to only update the properties given in the updateObject.  Returns a Promise.
     
     Post.updateById('IRjTSGf2VqTZbn1HVen9', { title: 'Some other title' });
     
- **.update(field, operator, value, updateObj)**
+**.update(field, operator, value, updateObj)**
+
  The update method accepts the same fields as as Firestore queries, essentially acting as an interface for them. `field` should be the *field* to filter on **(:eye-roll)**.  `operator` should be a Firestore-supported operator: `<`, `<=`, `==`, `>`, `>=`, or `array_contains`.  `value` should be....well, the value to look for. These parameters are all **required**. Uses `{ merge: true }` to only update the properties given in the updateObject. Updates all matching Documents. Returns a Promise.
 
     // Perform Firestore query
@@ -240,8 +283,10 @@ FireArch supports autopopulation of model properties. The method expects a 'path
 Given that there aren't any other good, simple Mongoose-like libraries out there for Firebase someone had to start one. This is it.
 
 **Contributing**
+
 FireArch is at a very initial stage and is welcome to help from contributors. Fork and create a Pull Request!
 
 **Contributors**
+
 Steven Halase ([email](mailto:steven.halase@gmail.com))
 You? ....maybe?
