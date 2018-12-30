@@ -1,10 +1,12 @@
+**Firearch has moved to gcloud/firestore library to keep in line with Google's own internal movement away from Firebase and into the Google Cloud Platform**
+
 # FireArch
-A [Firebase](https://firebase.google.com/) object modeling library. Built with influences of the [Mongoose](https://mongoosejs.com/) modeling and access paradigms.
+A [Google Cloud Firestore](https://cloud.google.com/firestore/) object modeling library. Built with influences of the [Mongoose](https://mongoosejs.com/) modeling and access paradigms.
 
 **THIS PACKAGE IS NOT PRODUCTION READY**
 
 ## Installation
-FireArch will be released in the future and available on NPM. For the time being the repo can be included in a project via:
+Firearch can be installed using NPM:
 
     npm install firearch
 
@@ -13,20 +15,15 @@ FireArch can be imported via standard Node.js require:
 
     const  firearch  =  require('firearch');
 
-## Connecting to Firebase
-FireArch creates a connection to Firebase in much the same way [Mongoose](https://mongoosejs.com/) connects to MongoDB:
+## Connecting to Firestore
+FireArch creates a connection to Firestore in much the same way [Mongoose](https://mongoosejs.com/) connects to MongoDB:
 
-    firearch.connect(firebaseConfig,  { timestampsInSnapshots:  true  });
-where `firebaseConfig` is a standard Firebase connection object and the second parameter is Firestore settings:
+    firearch.connect(firestoreSettings);
 
-    {
-	    apiKey:  "your-api-key",
-	    authDomain:  "your-auth-domain",
-	    databaseURL:  "your-database-url",
-	    projectId:  "your-project-id",
-	    storageBucket:  "your-storage-bucket",
-	    ...etc
-    }
+## Authorizing to Firestore
+It is recommended to use keyfile authorization and environment variable setup using the `dotenv` NPM package. Simply include the package in your project, download the keyfile from Google Cloud Console and set the following environment variable in a `.env` file at the root of your project.
+
+    GOOGLE_APPLICATION_CREDENTIALS="./path/to/keyfile.json"
 
 ## Defining Models
 Model definitions are also much the same as [Mongoose](https://mongoosejs.com/):
@@ -175,7 +172,7 @@ FireArch currently supports **ONLY** `Pre` hooks for models.  Hooks can be used 
 ## Population
 FireArch supports autopopulation of model properties. The method expects a 'path' which refers to the field defined in the Schema. It also expects a `model` referring to the string name of another model in the consuming package. The `populate` method can be called via `this` only within a Hook at this time. This will be extended to other use-cases in the future.
 
-**IMPORTANT: Inifinite population is not protected against currently! Do not register a populate for a field referencing a model that also has a populate registered for this model!**
+**IMPORTANT: Population will only occur up to 1 level deep at this time, in order to protect against infinite loop population scenarios!**
 
 **No bully ples.**
 
