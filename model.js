@@ -36,7 +36,7 @@ module.exports = class Model {
       const gcFile = this._storageInstance.bucket(this._storageBucketName).file(fullStoragePath);
       file.pipe(gcFile.createWriteStream({ predefinedAcl: 'publicread' }))
         .on('error', err => {
-          reject(error);
+          reject(err);
         })
         .on('finish', () => {
           resolve(`https://${this._storageBucketName}.storage.googleapis.com/${fullStoragePath}`)
