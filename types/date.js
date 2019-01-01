@@ -1,6 +1,5 @@
 module.exports = class DateType {
   static validate(value) {
-    console.log(value);
     value = typeof value.seconds !== 'undefined' && typeof value.nanoseconds !== 'undefined'
       ? (value.seconds * 1000) + (value.nanoseconds / 1000000)
       : value;
