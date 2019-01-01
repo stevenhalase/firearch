@@ -53,6 +53,7 @@ module.exports = class Schema {
       }
     }
     if (this._fieldDefs[key] === Number) {
+      valid = NumberType.validate(value);
       if (!valid) {
         throw new Error(`${this._model._modelName} property '${key}' is invalid. Expected Number. Value: ${value}.`);
       }
