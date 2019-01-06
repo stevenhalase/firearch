@@ -95,7 +95,7 @@ module.exports = class Model {
     });
   }
 
-  find(field, operator, value) {
+  find(field, operator, value, skipPopulate) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       let query = this._firestoreInstance.collection(this._modelName);
@@ -124,12 +124,16 @@ module.exports = class Model {
         return results;
       })
       .then(async results => {
-        const resultsPopulates = [];
-        await asyncForEach(results, async (doc) => {
-          const res = await this._modelSchema._doPopulates(doc);
-          resultsPopulates.push(res);
-        });
-        return resultsPopulates;
+        if (!skipPopulate) {
+          const resultsPopulates = [];
+          await asyncForEach(results, async (doc) => {
+            const res = await this._modelSchema._doPopulates(doc);
+            resultsPopulates.push(res);
+          });
+          return resultsPopulates;
+        } else {
+          return results;
+        }
       })
       .then(async results => {
         const resultsVirtuals = [];

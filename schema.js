@@ -181,7 +181,7 @@ module.exports = class Schema {
       const fieldName = virtual.fieldName;
       const virtualDef = virtual.virtualDef;
       const model = this._models.find(m => m._modelName === virtualDef.ref);
-      object[fieldName] = await model.find(virtualDef.foreignField, '==', object[virtualDef.localField]);
+      object[fieldName] = await model.find(virtualDef.foreignField, '==', object[virtualDef.localField], true);
     }
     return object;
   }
