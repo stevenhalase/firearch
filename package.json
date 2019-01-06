@@ -1,6 +1,6 @@
 {
   "name": "firearch",
-  "version": "0.0.1009",
+  "version": "0.0.1010",
   "description": "Schema modeling for Firestore",
   "main": "index.js",
   "scripts": {
@@ -15,5 +15,17 @@
   "dependencies": {
     "@google-cloud/firestore": "^0.19.0",
     "@google-cloud/storage": "^2.3.4"
-  }
+  },
+  "keywords": [
+    "firebase",
+    "firestore",
+    "storage",
+    "google",
+    "cloud",
+    "orm",
+    "schema",
+    "modeling",
+    "api",
+    "relational"
+  ]
 }
