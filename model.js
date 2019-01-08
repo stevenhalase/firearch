@@ -95,7 +95,7 @@ module.exports = class Model {
     });
   }
 
-  find(field, operator, value, skipPopulate) {
+  find(field, operator, value, skipPopulate, attachModel) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       let query = this._firestoreInstance.collection(this._modelName);
@@ -144,6 +144,7 @@ module.exports = class Model {
         return resultsVirtuals;
       })
       .then(results => {
+        results.forEach(r => r._model = this._modelName);
         resolve(results);
       })
       .catch(error => {
