@@ -95,7 +95,7 @@ module.exports = class Model {
     });
   }
 
-  find(field, operator, value, skipPopulate, attachModel) {
+  find(field, operator, value, skipPopulate) {
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       let query = this._firestoreInstance.collection(this._modelName);
