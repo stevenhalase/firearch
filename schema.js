@@ -187,19 +187,34 @@ module.exports = class Schema {
   }
 
   populate(def) {
-    this._populates.push(def);
+    if (!this._populates.find(p => p.path === def.path)) {
+      this._populates.push(def);
+    }
+    
     return;
   }
 
   pre(operation, cb) {
-    this._preOps.push({ operation, cb });
+    if (!this._preOps.find(p => p.operation === operation)) {
+      this._preOps.push({ operation, cb });
+    }
+    
+    return;
   }
 
   virtual(fieldName, virtualDef) {
-    this._virtuals.push({ fieldName, virtualDef });
+    if (!this._virtuals.find(v => v.fieldName === fieldName)) {
+      this._virtuals.push({ fieldName, virtualDef });
+    }
+    
+    return;
   }
 
   upload(storagePath, path) {
-    this._uploads.push({ storagePath, path }); 
+    if (!this._uploads.find(v => v.path === path)) {
+      this._uploads.push({ storagePath, path }); 
+    }
+    
+    return;
   }
 };
