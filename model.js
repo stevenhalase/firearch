@@ -144,6 +144,7 @@ module.exports = class Model {
         return resultsVirtuals;
       })
       .then(results => {
+        results.forEach(r => r._model = this._modelName);
         resolve(results);
       })
       .catch(error => {
