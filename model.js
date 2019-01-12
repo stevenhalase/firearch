@@ -230,8 +230,9 @@ module.exports = class Model {
         
         const build = this._modelSchema._build(updateObj, true);
         this._firestoreInstance.collection(this._modelName).doc(id).set(build, { merge: true })
-          .then(() => {
-            resolve(`Document ${id} successfully updated.`);
+          .then(async () => {
+            const updatedDoc = await this.findById(id);
+            resolve(updatedDoc);
           })
           .catch(error => {
             reject(error);
