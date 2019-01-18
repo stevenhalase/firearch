@@ -78,6 +78,9 @@ module.exports = class Schema {
         }
       }
     }
+    if (typeof this._fieldDefs[key] === 'object') {
+      valid = true
+    }
 
     return valid;
   }
@@ -107,6 +110,9 @@ module.exports = class Schema {
       if (typeof this._fieldDefs[key][0] === 'object' && Object.keys(this._fieldDefs[key][0]).includes('ref')) {
         retVal = RefType.getValueArray(value);
       }
+    }
+    if (typeof this._fieldDefs[key] === 'object') {
+      retVal = value;
     }
 
     return retVal;
