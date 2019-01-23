@@ -1,3 +1,5 @@
+const Firestore = require('@google-cloud/firestore');
+
 const StringType = require('./types/string');
 const BooleanType = require('./types/boolean');
 const DateType = require('./types/date');
@@ -135,7 +137,9 @@ module.exports = class Schema {
     let retObject = {};
     for (const key in this._fieldDefs) {
       // TODO: Build in required properties.
-      if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
+      if (object[key] === undefined) {
+        retObject[key] = Firestore.FieldValue.delete();
+      } else if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
         try {
           this._validateField(key, object[key]);
           retObject[key] = this._getValue(key, object[key]);
