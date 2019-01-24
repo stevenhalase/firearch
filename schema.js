@@ -133,11 +133,11 @@ module.exports = class Schema {
     return;
   }
 
-  _build(object, removeId) {
+  _build(object, removeId, includeDeletes) {
     let retObject = {};
     for (const key in this._fieldDefs) {
       // TODO: Build in required properties.
-      if (object.hasOwnProperty(key) && object[key] === undefined) {
+      if (object.hasOwnProperty(key) && object[key] === undefined && includeDeletes) {
         retObject[key] = Firestore.FieldValue.delete();
       } else if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
         try {

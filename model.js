@@ -228,7 +228,7 @@ module.exports = class Model {
 
       try {
         
-        const build = this._modelSchema._build(updateObj, true);
+        const build = this._modelSchema._build(updateObj, true, true);
         this._firestoreInstance.collection(this._modelName).doc(id).set(build, { merge: true })
           .then(async () => {
             const updatedDoc = await this.findById(id);
@@ -254,7 +254,7 @@ module.exports = class Model {
         return;
       }
 
-      const build = this._modelSchema._build(updateObj, true);
+      const build = this._modelSchema._build(updateObj, true, true);
       
       this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
         .then(querySnapshot => {
