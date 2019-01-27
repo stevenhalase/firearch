@@ -133,7 +133,8 @@ module.exports = class Schema {
     return;
   }
 
-  _build(object, removeId, includeDeletes) {
+  _build(object, removeId, includeDeletes, cleanRefs) {
+    console.log(object);
     let retObject = {};
     for (const key in this._fieldDefs) {
       // TODO: Build in required properties.
@@ -141,6 +142,9 @@ module.exports = class Schema {
         retObject[key] = Firestore.FieldValue.delete();
       } else if (object.hasOwnProperty(key) && typeof object[key] !== 'undefined') {
         try {
+          if (cleanRefs) {
+            this._depopulate(key, object);
+          }
           this._validateField(key, object[key]);
           retObject[key] = this._getValue(key, object[key]);
         } catch (error) {
@@ -156,6 +160,36 @@ module.exports = class Schema {
     }
 
     return retObject;
+  }
+
+  _depopulate(key, object) {
+    const isRefArray = this._fieldDefs[key] instanceof Array
+      && typeof this._fieldDefs[key][0] === 'object'
+      && Object.keys(this._fieldDefs[key][0]).includes('ref');
+    const isRef = typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref');
+
+    console.log(isRefArray, isRef);
+
+    if (isRefArray) {
+      const depopulated = [];
+      for (const value of object[key]) {
+        if (typeof value === 'object') {
+          depopulated.push(value._id);
+        } else {
+          depopulated.push(value);
+        }
+      }
+      object[key] = depopulated;
+    }
+
+    if (isRef) {
+      const value = object[key];
+      if (typeof value === 'object') {
+        object[key] = value._id;
+      } else {
+        object[key] = value;
+      }
+    }
   }
 
   async _doPopulates(object) {

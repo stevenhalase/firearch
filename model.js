@@ -67,10 +67,16 @@ module.exports = class Model {
   }
 
   findById(id, skipPopulate) {
+    console.log(id);
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       this._firestoreInstance.collection(this._modelName).doc(id).get()
       .then(doc => {
+        console.log('DOC: ', doc);
+        if (doc && !doc.exists) {
+          console.log('dont exist');
+          throw new Error(`Document ${id} does not exist`);
+        }
         return doc.data();
       })
       .then(doc => this._modelSchema._build(doc))
@@ -114,6 +120,7 @@ module.exports = class Model {
       })
       .then(results => {
         const resultsBuild = [];
+        console.log(results);
         results.forEach(doc => {
           resultsBuild.push(this._modelSchema._build(doc));
         });
@@ -156,7 +163,7 @@ module.exports = class Model {
   save(object) {
     return new Promise((resolve, reject) => {
       try {
-        const build = this._modelSchema._build(object);
+        const build = this._modelSchema._build(object, false, false, true);
 
         const docRef = this._firestoreInstance.collection(this._modelName).doc();
         const docId = docRef.id;
@@ -228,7 +235,7 @@ module.exports = class Model {
 
       try {
         
-        const build = this._modelSchema._build(updateObj, true, true);
+        const build = this._modelSchema._build(updateObj, true, true, true);
         this._firestoreInstance.collection(this._modelName).doc(id).set(build, { merge: true })
           .then(async () => {
             const updatedDoc = await this.findById(id);
@@ -254,7 +261,7 @@ module.exports = class Model {
         return;
       }
 
-      const build = this._modelSchema._build(updateObj, true, true);
+      const build = this._modelSchema._build(updateObj, true, true, true);
       
       this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
         .then(querySnapshot => {
