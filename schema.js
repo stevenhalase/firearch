@@ -134,7 +134,6 @@ module.exports = class Schema {
   }
 
   _build(object, removeId, includeDeletes, cleanRefs) {
-    console.log(object);
     let retObject = {};
     for (const key in this._fieldDefs) {
       // TODO: Build in required properties.
@@ -167,8 +166,6 @@ module.exports = class Schema {
       && typeof this._fieldDefs[key][0] === 'object'
       && Object.keys(this._fieldDefs[key][0]).includes('ref');
     const isRef = typeof this._fieldDefs[key] === 'object' && Object.keys(this._fieldDefs[key]).includes('ref');
-
-    console.log(isRefArray, isRef);
 
     if (isRefArray) {
       const depopulated = [];

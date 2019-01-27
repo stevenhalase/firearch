@@ -67,14 +67,11 @@ module.exports = class Model {
   }
 
   findById(id, skipPopulate) {
-    console.log(id);
     this._modelSchema._populates = [];
     return new Promise((resolve, reject) => {
       this._firestoreInstance.collection(this._modelName).doc(id).get()
       .then(doc => {
-        console.log('DOC: ', doc);
         if (doc && !doc.exists) {
-          console.log('dont exist');
           throw new Error(`Document ${id} does not exist`);
         }
         return doc.data();
@@ -120,7 +117,6 @@ module.exports = class Model {
       })
       .then(results => {
         const resultsBuild = [];
-        console.log(results);
         results.forEach(doc => {
           resultsBuild.push(this._modelSchema._build(doc));
         });
