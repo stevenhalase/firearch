@@ -284,4 +284,18 @@ module.exports = class Model {
     }); 
   }
 
+  schema() {
+    const schema = {};
+    for (const key in this._modelSchema._fieldDefs) {
+      // console.log(key);
+      if (typeof this._modelSchema._fieldDefs[key] === 'function') {
+        schema[key] = this._modelSchema._fieldDefs[key].name;
+      } else {
+        schema[key] = this._modelSchema._fieldDefs[key];
+      }
+      
+    }
+    return schema;
+  }
+
 };
