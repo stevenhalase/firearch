@@ -164,9 +164,12 @@ module.exports = class Model {
         const docRef = this._firestoreInstance.collection(this._modelName).doc();
         const docId = docRef.id;
         build._id = docId;
+        build._c = Date.now();
+        build._u = Date.now();
         docRef.set(build)
-          .then(doc => {
-            resolve(docId);
+          .then(async doc => {
+            const newDoc = await this.findById(docId);
+            resolve(newDoc);
           })
           .catch(error => {
             reject(error);
@@ -232,6 +235,8 @@ module.exports = class Model {
       try {
         
         const build = this._modelSchema._build(updateObj, true, true, true);
+        build._u = Date.now();
+        
         this._firestoreInstance.collection(this._modelName).doc(id).set(build, { merge: true })
           .then(async () => {
             const updatedDoc = await this.findById(id);
@@ -258,6 +263,7 @@ module.exports = class Model {
       }
 
       const build = this._modelSchema._build(updateObj, true, true, true);
+      build._u = Date.now();
       
       this._firestoreInstance.collection(this._modelName).where(field, operator, value).get()
         .then(querySnapshot => {
