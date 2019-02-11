@@ -154,6 +154,14 @@ module.exports = class Schema {
     }
 
     retObject._id = object._id;
+
+    if (object._c) {
+      retObject._c = object._c;
+    }
+    if (object._u) {
+      retObject._u = object._u;
+    }
+
     if (removeId) {
       delete retObject._id;
     }
